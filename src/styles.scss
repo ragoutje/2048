@@ -1,0 +1,18 @@
+.grid {
+    margin: 0 auto;
+    width: 600px;
+    height: 600px;
+    display: grid;
+    grid-gap: 0;
+    grid-template-rows: repeat(4, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+
+    &-cell {
+        border: 1px solid black;
+        display: flex;
+        text-align: center;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+    }
+}

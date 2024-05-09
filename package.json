@@ -1,0 +1,23 @@
+{
+  "name": "2048",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --"
+  },
+  "dependencies": {
+    "vue": "^3.4.21"
+  },
+  "devDependencies": {
+    "@babel/types": "^7.24.5",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/test-utils": "^2.4.5",
+    "sass": "^1.76.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vitest": "^1.6.0",
+    "vue-tsc": "^2.0.16"
+  }
+}
