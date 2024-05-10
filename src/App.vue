@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {onBeforeMount, ref, Ref, unref} from "vue";
+import {onBeforeMount, ref, Ref, TransitionGroup, unref} from "vue";
+import { useSwipe } from "./Touchable";
 
 type MatrixIndice = Array<number>;
 type Matrix = Array<MatrixIndice>;
@@ -33,7 +34,6 @@ const rangeFrom = ({length}: {length: number}): any[] => [...Array(length).keys(
 const shallowCopyMatrix = (matrix: Matrix): Matrix => map(shallow, shallow(matrix)); // Shallow copy of the rows and row contents in the matrix
 const mirrorMatrix = (matrix: Matrix): Matrix => map(reverse, shallow(matrix)); // Reverse the row contents in the matrix
 
-// TODO validate usage and correctness for this 2048 game
 const flipMatrix = (matrix: any[]) => map((i: number) => pluck(i, matrix), rangeFrom(matrix));
 const rotateMatrix = compose(flipMatrix, reverse);
 const flipMatrixCounterClockwise = compose(reverse, rotateMatrix);
@@ -73,18 +73,27 @@ const directionMaps = [
 let matrix: Ref<Matrix> = ref(generateMatrix(gridSize, gridSize));
 
 onBeforeMount(() => {
-  setRandomNumber(1);
-
+  writeMatrixToRef(
+    setRandomNumber(unref(matrix), 1)
+);
+  
   addEventListener("keydown", (e) => {
     const map = directionMaps.find(map => map.keyCodes.includes(e.key))
     if (typeof map !== 'undefined') {
       handleMove(unref(matrix), map);
     }
   });
+
+  const { onSwipeLeft, onSwipeUp, onSwipeRight, onSwipeDown } = useSwipe(document.body);
+  onSwipeLeft((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='left')));
+  onSwipeUp((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='up')));
+  onSwipeRight((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='right')));
+  onSwipeDown((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='down')));
 });
 
-// TODO: make it a pure function taking a matrix and returning a new one with added numbers
-const setRandomNumber = (amount: number) => {
+const setRandomNumber = (matrix: Matrix, amount: number): Matrix => {
+  let adjustedMatrix = shallowCopyMatrix(matrix);
+
   let times = 0;
   let loops = 0;
 
@@ -94,12 +103,14 @@ const setRandomNumber = (amount: number) => {
     const randIRow = Math.floor((Math.random() * gridSize));
     const randICol = Math.floor((Math.random() * gridSize));
 
-    // Only add if the value 
-    if (matrix.value[randIRow][randICol] <= 0) {
-      matrix.value[randIRow][randICol] = startValue
+    // Only add a random number of its cell was previously empty
+    if (adjustedMatrix[randIRow][randICol] <= 0) {
+      adjustedMatrix[randIRow][randICol] = startValue
       times++;
     }
   }
+
+  return adjustedMatrix;
 }
 
 const writeMatrixToRef = (newMatrix: Matrix) => {
@@ -115,6 +126,9 @@ const isValidMove = (oldMatrix: Matrix, newMatrix: Matrix): boolean => {
   return true;
 };
 
+const hasMovesLeft = (matrix: Matrix): boolean => matrix.flat().includes(0);
+const hasWinningNumber = (matrix: Matrix): boolean => matrix.flat().includes(finishNumber);
+
 const handleMove = (oldMatrix: Matrix, directionMap: any) => {
   // shallowCopy and rotate for movement fn
   let adjustedMatrix: Matrix = compose(directionMap.preRotate, shallowCopyMatrix)(oldMatrix);
@@ -125,10 +139,17 @@ const handleMove = (oldMatrix: Matrix, directionMap: any) => {
 
   // Validate for valid movement before adding a new start cell
   if (isValidMove(oldMatrix, adjustedMatrix)) {
+    adjustedMatrix = setRandomNumber(adjustedMatrix, 1);
     writeMatrixToRef(adjustedMatrix);
-    // TODO: Watch for loss conditions watcher fn
-    // TODO: Watch for win conditions watcher fn
-    setRandomNumber(1);
+  }
+
+  const hasLost: boolean = !hasMovesLeft(adjustedMatrix);
+  const hasWon: boolean = hasWinningNumber(adjustedMatrix);
+
+  if (hasLost || hasWon) {
+    if (confirm(hasLost ? 'You lost! Start a new game?' : 'You won! Start a new game?')) {
+      writeMatrixToRef(generateMatrix(gridSize, gridSize));
+    }
   }
 }
 
@@ -146,6 +167,7 @@ const moveCells = (matrix: Matrix): Matrix => {
 
       // Loop through row, from left to right
       // to discover other values, and merge them to the left
+      // TODO: only merge cells adjacent to eachother
       for(let iAdjCell = 0; iAdjCell < rowCells.length; iAdjCell++) {
 
         // Only check values to the right of our current cell
@@ -171,12 +193,24 @@ const moveCells = (matrix: Matrix): Matrix => {
 
   return newMatrix;
 }
+
+const gridCellClass = (cellVal: number): string => `grid-cell--${cellVal}`;
 </script>
 
 <template>
-  <div class="grid">
-    <template v-for="rows in matrix">
-      <div class="grid-cell" v-for="(cell, i) in rows">{{ cell ? cell : '' }}</div>
-    </template>
+  <div class="game-container">
+    <h1>2048</h1>
+    <div class="grid">
+      <template v-for="(row, iRow) in matrix">
+        <div
+        v-for="(cell, iCell) in row"
+        :key="`cell-${iRow}-${iCell}`"
+        class="grid-cell"
+          :class="[gridCellClass(cell)]"
+        >
+        {{ cell ? cell : '' }}
+      </div>
+      </template>
+    </div>
   </div>
 </template>
