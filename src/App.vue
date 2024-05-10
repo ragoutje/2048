@@ -20,96 +20,122 @@ const generateMatrix = (xSize: number, ySize: number): Matrix => {
   return matrix;
 }
 
-const gridSize: number = 4;
-const startValue = 2;
-const finishNumber = 2048;
-const directionMap = { 'ArrowLeft': 'left', 'ArrowRight': 'right', 'ArrowUp': 'up', 'ArrowDown': 'down' };
-let matrix: Ref<Matrix> = ref(generateMatrix(gridSize, gridSize));
-
-onBeforeMount(() => {
-  // setRandomStartNumber();
-  matrix.value[0][1] = 2;
-  matrix.value[0][2] = 2;
-
-  addEventListener("keydown", (e) => {
-    if (['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'].includes(e.key)) {
-      handleMove(directionMap[e.key]);
-    }
-  });
-});
-
-const setRandomStartNumber = () => {
-  const randIRow = Math.floor((Math.random() * gridSize));
-  const randICol = Math.floor((Math.random() * gridSize));
-
-  matrix.value[randIRow][randICol] = startValue;
-}
-
-const handleMove = (direction: string) => {
-  let adjustedMatrix: Matrix = [ ...unref(matrix) ];
-  
-  // Rotate/flip grid fn
-  adjustedMatrix = rotateDirectional(adjustedMatrix, direction);
-  console.log(adjustedMatrix);
-  
-  // Validate if cells can be moved fn
-  let isValid = true;
-  if (!isValid) return;
-  
-  // Move cells fn
-  adjustedMatrix = moveCells(adjustedMatrix);
-  console.log(adjustedMatrix);
-  
-  // Rotate/flip grid back fn
-  
-  // Write cells to matrix ref
-  // Trigger new random cell value fn
-  
-  // Watch for loss conditions watcher fn
-  // Watch for win conditions watcher fn
-}
 
 const compose = (a: Function, b: Function): Function => (x: any): Function => a(b(x));
-const reverse = (arr: any[]): any[] => [...arr].reverse();
+const map = (fn: any, arr: any[]): any[] => arr.map(fn); // composable map fn which accepts a fn as first argument
 const get = (i: number): Function => (arr: any[]): any => arr[i];
-const map = (fn: any, arr: any[]) => arr.map(fn);
-const pluck = (i: number, matrix: any[]) => map(get(i), matrix);
-const rangeFrom = ({length}): any[] => [...Array(length).keys()];
+
+const shallow = (arr: any[]): any[] => [...arr]; // Shallow copy top level of an array
+const reverse = (arr: any[]): any[] => shallow(arr).reverse(); // reverse the top level(rows) in the matrix, not the content of the rows
+const pluck = (i: number, matrix: any[]) => map(get(i), matrix); // get value i from all rows in the matrix
+const rangeFrom = ({length}: {length: number}): any[] => [...Array(length).keys()]; // Make an new array with n entries, their value is equal to their index
+
+const shallowCopyMatrix = (matrix: Matrix): Matrix => map(shallow, shallow(matrix)); // Shallow copy of the rows and row contents in the matrix
+const mirrorMatrix = (matrix: Matrix): Matrix => map(reverse, shallow(matrix)); // Reverse the row contents in the matrix
+
+// TODO validate usage and correctness for this 2048 game
 const flipMatrix = (matrix: any[]) => map((i: number) => pluck(i, matrix), rangeFrom(matrix));
 const rotateMatrix = compose(flipMatrix, reverse);
 const flipMatrixCounterClockwise = compose(reverse, rotateMatrix);
 const rotateMatrixCounterClockwise = compose(reverse, flipMatrix);
 
-const shallowCopyMatrix = (matrix: any[][]): any[][] => {
-  let shallowCopy = [];
 
-  for(let iRow = 0; iRow < matrix.length; iRow++) {
-    let newRow = [];
-    for(let iCell = 0; iCell < matrix.length; iCell++) {
-      newRow.push(matrix[iRow][iCell]);
+
+const gridSize: number = 4;
+const startValue = 2;
+const finishNumber = 2048;
+const directionMaps = [
+  {
+    'direction': 'left',
+    'keyCodes': ['ArrowLeft'],
+    'preRotate': (m: Matrix): Matrix => m,
+    'postRotate': (m: Matrix): Matrix => m,
+  },
+  {
+    'direction': 'up',
+    'keyCodes': ['ArrowUp'],
+    'preRotate': rotateMatrixCounterClockwise,
+    'postRotate': rotateMatrix,
+  },
+  {
+    'direction': 'right',
+    'keyCodes': ['ArrowRight'],
+    'preRotate': mirrorMatrix,
+    'postRotate': mirrorMatrix,
+  },
+  {
+    'direction': 'down',
+    'keyCodes': ['ArrowDown'],
+    'preRotate': rotateMatrix,
+    'postRotate': rotateMatrixCounterClockwise,
+  },
+];
+let matrix: Ref<Matrix> = ref(generateMatrix(gridSize, gridSize));
+
+onBeforeMount(() => {
+  setRandomNumber(1);
+
+  matrix.value[0][1] = 2;
+  matrix.value[0][2] = 2;
+
+  addEventListener("keydown", (e) => {
+    const map = directionMaps.find(map => map.keyCodes.includes(e.key))
+    if (typeof map !== 'undefined') {
+      handleMove(unref(matrix), map);
     }
-    shallowCopy.push(newRow);
+  });
+});
+
+// TODO: make it a pure function taking a matrix and returning a new one with added numbers
+const setRandomNumber = (amount: number) => {
+  let times = 0;
+  let loops = 0;
+
+  while (times < amount) {
+    loops++;
+
+    const randIRow = Math.floor((Math.random() * gridSize));
+    const randICol = Math.floor((Math.random() * gridSize));
+
+    // Only add if the value 
+    if (matrix.value[randIRow][randICol] <= 0) {
+      matrix.value[randIRow][randICol] = startValue
+      times++;
+    }
   }
-  return shallowCopy;
 }
 
-const rotateDirectional = (matrix: Matrix, direction: string): Matrix => {
-  let rotatedMatrix: Matrix = shallowCopyMatrix(matrix);
+const writeMatrixToRef = (newMatrix: Matrix) => {
+  newMatrix.forEach(
+    (newRow, iRow) => newRow.forEach(
+      (newCell, iCell) => matrix.value[iRow][iCell] = newCell
+    )
+  )
+}
 
-  if (direction === 'right') {
-    // WHY does flip rotate 90c clockwise?
-    // rotatedMatrix = rotateMatrixCounterClockwise(rotatedMatrix);
-  }
-  if (direction === 'up') {
-    rotatedMatrix = rotateMatrix(rotatedMatrix);
-  }
-  if (direction === 'down') {
-    rotatedMatrix = rotateMatrixCounterClockwise(rotatedMatrix);
-  }
-
-  return [ ...rotatedMatrix ];
+// TODO compare both matrices to eachother for stric value equality
+const isValidMove = (oldMatrix: Matrix, newMatrix: Matrix): boolean => {
+  return true;
 };
 
+const handleMove = (oldMatrix: Matrix, directionMap: any) => {
+  // shallowCopy and rotate for movement fn
+  let adjustedMatrix: Matrix = compose(directionMap.preRotate, shallowCopyMatrix)(oldMatrix);
+
+  // move and rotate back
+  adjustedMatrix = compose(directionMap.postRotate, moveCells)(adjustedMatrix);
+  
+
+  // Validate for valid movement before adding a new start cell
+  if (isValidMove(oldMatrix, adjustedMatrix)) {
+    writeMatrixToRef(adjustedMatrix);
+    // TODO: Watch for loss conditions watcher fn
+    // TODO: Watch for win conditions watcher fn
+    setRandomNumber(1);
+  }
+}
+
+// TODO clean up loopy code
 const moveCells = (matrix: Matrix): Matrix => {
   const oldMatrix = shallowCopyMatrix(matrix);
   let newMatrix: Matrix = [];
