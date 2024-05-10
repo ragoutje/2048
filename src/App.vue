@@ -75,9 +75,6 @@ let matrix: Ref<Matrix> = ref(generateMatrix(gridSize, gridSize));
 onBeforeMount(() => {
   setRandomNumber(1);
 
-  matrix.value[0][1] = 2;
-  matrix.value[0][2] = 2;
-
   addEventListener("keydown", (e) => {
     const map = directionMaps.find(map => map.keyCodes.includes(e.key))
     if (typeof map !== 'undefined') {
