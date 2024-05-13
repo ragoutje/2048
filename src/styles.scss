@@ -3,6 +3,9 @@ html {
 }
 
 body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     height: 100%;
     min-height: 100%;
     padding: 0;
@@ -10,7 +13,7 @@ body {
     background-color: #eee;
     color: #111;
     font-family: 'Roboto', sans-serif;
-    font-size: 18px;
+    font-size: 7.5vmin;
     line-height: 24px;
     font-weight: 300;
 
@@ -19,11 +22,36 @@ body {
     }
 }
 
-#app {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
+h1 {
+    margin: 0 auto;
+    padding-bottom: 0.5em;
+    position: relative;
+    line-height: 1.5em;
+    font-size: 1em;
+
+    button {
+        position: absolute;
+        right: 0px;
+    }
+}
+
+button {
+    display: inline-block;
+    height: 42px;
+    border: 1px solid #454545;
+    background-color: white;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 6px;
+    user-select: none;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    vertical-align: middle;
+
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .game-container {
@@ -31,67 +59,74 @@ body {
 }
 
 .grid {
+    position: relative;
     margin: 0 auto;
-    width: 600px;
-    height: 600px;
     display: grid;
     grid-gap: 0;
-    grid-template-rows: repeat(4, 1fr);
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 20vmin);
+    grid-template-columns: repeat(4, 20vmin);
+    border-radius: 2vmin;
+    gap: 2vmin;
+    padding: 2vmin;
+    background-color: #ccc;
 
     &-cell {
-        border: 1px solid black;
         display: flex;
         text-align: center;
         vertical-align: middle;
         align-items: center;
         justify-content: center;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 2vmin;
+        background-color: #fff;
 
         &--2 {
-            background-color: #67fa57;
+            background-color: #c4ffbc;
         }
         &--4 {
-            background-color: #30fc33;
+            background-color: #99ff87;
         }
         &--8 {
-            background-color: #55e900;
+            background-color: #71fd20;
         }
         &--16 {
-            background-color: #8ce900;
+            background-color: #c4fc0d;
         }
         &--32 {
-            background-color: #cee900;
+            background-color: #e2ff0a;
         }
         &--64 {
-            background-color: #e9ce00;
+            background-color: #ffe100;
         }
         &--128 {
-            background-color: #e9ab00;
+            background-color: #ffb300;
         }
         &--256 {
-            background-color: #e99000;
+            background-color: #e98c00;
         }
         &--512 {
-            background-color: #e97100;
+            background-color: #e96d00;
         }
         &--1024 {
-            background-color: #e92f00;
+            background-color: #eb4e10;
         }
-        &--2048 {
-            background-color: #e90000;
-            color: white;
+        &--2048, &--4096, &--8192, &--16384 {
+            background-color: #e92f00;
         }
     }
 }
 
 @media (orientation: portrait) {
+    
     .game-container {
         padding: 16px;
     }
 
-    .grid {
+    h1 {
         width: auto;
-        height: auto;
+    }
+
+    .grid {
         aspect-ratio: 1 / 1;
     }
 }

@@ -1,8 +1,9 @@
 # 2048 game using a 2d matrix
 
 ## Todo
+- Move pure function to own files
+- validate logic fix
+- win/loss logic fix
 - New game
-- Menu/meta data
-- Responsive styling
+- Menu, score
 - Support touch swiping
-- Save game to localStorage

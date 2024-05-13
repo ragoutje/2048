@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import {onBeforeMount, ref, Ref, TransitionGroup, unref} from "vue";
+import {onBeforeMount, ref, Ref, unref} from "vue";
 import { useSwipe } from "./Touchable";
 
-type MatrixIndice = Array<number>;
-type Matrix = Array<MatrixIndice>;
+const { onSwipeLeft, onSwipeUp, onSwipeRight, onSwipeDown } = useSwipe(document.body);
+
+type MatrixRow = Array<number>;
+type Matrix = Array<MatrixRow>;
 
 const generateMatrix = (xSize: number, ySize: number): Matrix => {
   let matrix: Matrix = [];
 
   for (let x = 0; x < xSize; x++) {
-    let indiceY: MatrixIndice = [];
+    let indiceY: MatrixRow = [];
 
     for (let y = 0; y < ySize; y++) {
       indiceY.push(0);
@@ -21,25 +23,19 @@ const generateMatrix = (xSize: number, ySize: number): Matrix => {
   return matrix;
 }
 
-
 const compose = (a: Function, b: Function): Function => (x: any): Function => a(b(x));
 const map = (fn: any, arr: any[]): any[] => arr.map(fn); // composable map fn which accepts a fn as first argument
 const get = (i: number): Function => (arr: any[]): any => arr[i];
-
 const shallow = (arr: any[]): any[] => [...arr]; // Shallow copy top level of an array
 const reverse = (arr: any[]): any[] => shallow(arr).reverse(); // reverse the top level(rows) in the matrix, not the content of the rows
 const pluck = (i: number, matrix: any[]) => map(get(i), matrix); // get value i from all rows in the matrix
 const rangeFrom = ({length}: {length: number}): any[] => [...Array(length).keys()]; // Make an new array with n entries, their value is equal to their index
-
 const shallowCopyMatrix = (matrix: Matrix): Matrix => map(shallow, shallow(matrix)); // Shallow copy of the rows and row contents in the matrix
 const mirrorMatrix = (matrix: Matrix): Matrix => map(reverse, shallow(matrix)); // Reverse the row contents in the matrix
-
 const flipMatrix = (matrix: any[]) => map((i: number) => pluck(i, matrix), rangeFrom(matrix));
 const rotateMatrix = compose(flipMatrix, reverse);
 const flipMatrixCounterClockwise = compose(reverse, rotateMatrix);
 const rotateMatrixCounterClockwise = compose(reverse, flipMatrix);
-
-
 
 const gridSize: number = 4;
 const startValue = 2;
@@ -72,10 +68,10 @@ const directionMaps = [
 ];
 let matrix: Ref<Matrix> = ref(generateMatrix(gridSize, gridSize));
 
+const startNewGame = () => writeMatrixToRef(setRandomNumber(generateMatrix(gridSize, gridSize), 1));
+
 onBeforeMount(() => {
-  writeMatrixToRef(
-    setRandomNumber(unref(matrix), 1)
-);
+  startNewGame();
   
   addEventListener("keydown", (e) => {
     const map = directionMaps.find(map => map.keyCodes.includes(e.key))
@@ -84,7 +80,6 @@ onBeforeMount(() => {
     }
   });
 
-  const { onSwipeLeft, onSwipeUp, onSwipeRight, onSwipeDown } = useSwipe(document.body);
   onSwipeLeft((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='left')));
   onSwipeUp((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='up')));
   onSwipeRight((e:TouchEvent) => handleMove(unref(matrix), directionMaps.find(map => map.direction ==='right')));
@@ -113,83 +108,87 @@ const setRandomNumber = (matrix: Matrix, amount: number): Matrix => {
   return adjustedMatrix;
 }
 
-const writeMatrixToRef = (newMatrix: Matrix) => {
-  newMatrix.forEach(
-    (newRow, iRow) => newRow.forEach(
-      (newCell, iCell) => matrix.value[iRow][iCell] = newCell
-    )
+const writeMatrixToRef = (newMatrix: Matrix) => newMatrix.forEach(
+  (newRow, iRow) => newRow.forEach(
+    (newCell, iCell) => matrix.value[iRow][iCell] = newCell
   )
-}
+);
 
-// TODO compare both matrices to eachother for stric value equality
-const isValidMove = (oldMatrix: Matrix, newMatrix: Matrix): boolean => {
-  return true;
+const isValidMove = (matrix: Matrix): boolean => {
+  let hasZeroBeforeLastCell = false; // <-0,2,4,8 = valid; <-2,4,8,0 = not valid;
+  let hasAdjacentDuplicate = false; // <-2,4,4,16 = valid; <-2,4,16,4 =  not valid;
+
+  matrix.forEach(row => {    
+    row.forEach((cell, iCell) => {
+      if (iCell !== row.length-1 && cell === 0) hasZeroBeforeLastCell = true;
+      if (cell === row[iCell+1]) hasAdjacentDuplicate = true;
+    });
+  });
+
+  return hasAdjacentDuplicate || hasZeroBeforeLastCell;
 };
 
-const hasMovesLeft = (matrix: Matrix): boolean => matrix.flat().includes(0);
+const hasMovesLeft = (matrix: Matrix): boolean => {
+  let hasValidMoves = false;
+
+  directionMaps.forEach(map => {
+    const adjustedMatrix = map.preRotate(shallowCopyMatrix(matrix));
+    if (isValidMove(adjustedMatrix)) hasValidMoves = true;
+  });
+
+  return hasValidMoves;
+};
 const hasWinningNumber = (matrix: Matrix): boolean => matrix.flat().includes(finishNumber);
 
 const handleMove = (oldMatrix: Matrix, directionMap: any) => {
-  // shallowCopy and rotate for movement fn
-  let adjustedMatrix: Matrix = compose(directionMap.preRotate, shallowCopyMatrix)(oldMatrix);
-
-  // move and rotate back
-  adjustedMatrix = compose(directionMap.postRotate, moveCells)(adjustedMatrix);
+  let adjustedMatrix: Matrix = compose(directionMap.preRotate, shallowCopyMatrix)(oldMatrix);  
   
-
-  // Validate for valid movement before adding a new start cell
-  if (isValidMove(oldMatrix, adjustedMatrix)) {
-    adjustedMatrix = setRandomNumber(adjustedMatrix, 1);
+  if (isValidMove(adjustedMatrix)) {
+    adjustedMatrix = compose(directionMap.postRotate, moveCells)(adjustedMatrix);
     writeMatrixToRef(adjustedMatrix);
-  }
-
-  const hasLost: boolean = !hasMovesLeft(adjustedMatrix);
-  const hasWon: boolean = hasWinningNumber(adjustedMatrix);
-
-  if (hasLost || hasWon) {
-    if (confirm(hasLost ? 'You lost! Start a new game?' : 'You won! Start a new game?')) {
-      writeMatrixToRef(generateMatrix(gridSize, gridSize));
+    setTimeout(() => {
+      adjustedMatrix = setRandomNumber(adjustedMatrix, 1);
+      writeMatrixToRef(adjustedMatrix);
+    }, 50);
+    
+    const hasLost: boolean = !hasMovesLeft(unref(matrix));
+    const hasWon: boolean = hasWinningNumber(unref(matrix));  
+    if (hasLost || hasWon) {
+      if (confirm(hasLost ? 'You lost! Start a new game?' : 'You won! Start a new game?')) {
+        writeMatrixToRef(generateMatrix(gridSize, gridSize));
+      }
     }
   }
 }
 
-// TODO clean up loopy code
+const moveZeroesToEnd = (arr: number[]): number[] => {
+  let zeros: number[] = [];
+  let newArr: number [] = [];
+
+  newArr = arr.filter(item => (item !== 0 ? true : zeros.push(item) && false));
+
+  return newArr.concat(zeros);
+}
+
 const moveCells = (matrix: Matrix): Matrix => {
-  const oldMatrix = shallowCopyMatrix(matrix);
-  let newMatrix: Matrix = [];
+  let newMatrix: Matrix = shallowCopyMatrix(matrix);
 
-  // Loop through rows
-  for (let iRow = 0; iRow < oldMatrix.length; iRow++) {
+  matrix.forEach((row, iRow) => {
+    let newRow = moveZeroesToEnd([...row]);
 
-    // Loop through cells in a row, from left to right
-    let rowCells = oldMatrix[iRow];
-    for(let iCell = 0; iCell < rowCells.length; iCell++) {
+    row.forEach((_cell, iCell) => {
+      const iAdj = iCell+1;
+      const nextCellIsSameValue = iAdj <= newRow.length ? newRow[iCell] === newRow[iAdj] : false;
 
-      // Loop through row, from left to right
-      // to discover other values, and merge them to the left
-      // TODO: only merge cells adjacent to eachother
-      for(let iAdjCell = 0; iAdjCell < rowCells.length; iAdjCell++) {
-
-        // Only check values to the right of our current cell
-        // Only above 0 do we need to merge/move
-        if (iAdjCell > iCell && rowCells[iAdjCell] > 0) {
-          // iCell is 0. Any value gets moved to iCell
-          if (rowCells[iCell] === 0) {
-            rowCells[iCell] = rowCells[iAdjCell];
-            rowCells[iAdjCell] = 0;
-
-          // iCell has a value. Only cells with the exact same value get merged
-          } else if (rowCells[iCell] === rowCells[iAdjCell]) {
-            rowCells[iCell] = rowCells[iCell] + rowCells[iAdjCell];
-            rowCells[iAdjCell] = 0;
-          }
-        }
-
+      if (nextCellIsSameValue) {
+        newRow[iCell] = newRow[iCell] + newRow[iAdj];
+        newRow[iAdj] = 0;
+        newRow = moveZeroesToEnd(newRow);
       }
-    }
+    });
 
-    newMatrix[iRow] = rowCells;
-  }
+    newMatrix[iRow] = newRow;
+  });
 
   return newMatrix;
 }
@@ -198,19 +197,20 @@ const gridCellClass = (cellVal: number): string => `grid-cell--${cellVal}`;
 </script>
 
 <template>
-  <div class="game-container">
-    <h1>2048</h1>
-    <div class="grid">
-      <template v-for="(row, iRow) in matrix">
-        <div
+  <!-- <h1>
+    2048
+    <button @click="startNewGame">New game</button>
+  </h1> -->
+  <div class="grid">
+    <template v-for="(row, iRow) in matrix">
+      <div
         v-for="(cell, iCell) in row"
         :key="`cell-${iRow}-${iCell}`"
         class="grid-cell"
-          :class="[gridCellClass(cell)]"
-        >
+        :class="[gridCellClass(cell)]"
+      >
         {{ cell ? cell : '' }}
       </div>
-      </template>
-    </div>
+    </template>
   </div>
 </template>
