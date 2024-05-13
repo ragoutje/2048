@@ -3,7 +3,7 @@ import { onMounted, ref, Ref } from 'vue';
 export type SwipeCallback = (event: TouchEvent) => void;
 
 export type SwipeOptions = {
-    directional_threshold?: number; // Pixels offset to trigger swipe
+    directional_threshold: number; // Pixels offset to trigger swipe
 };
 
 export const useSwipe = (touchableElement: HTMLElement|null = null, options: Ref<SwipeOptions> = ref({
@@ -40,19 +40,19 @@ export const useSwipe = (touchableElement: HTMLElement|null = null, options: Ref
     };
 
     const handleGesture = (event: TouchEvent) => {
-        if (touchEndX.value < touchStartX.value && (Math.max(touchStartY.value, touchEndY.value) - Math.min(touchStartY.value, touchEndY.value)) < options.value.directinoal_threshold) {
+        if (touchEndX.value < touchStartX.value && (Math.max(touchStartY.value, touchEndY.value) - Math.min(touchStartY.value, touchEndY.value)) < options.value.directional_threshold) {
             onSwipeLeft.forEach(callback => callback(event));
         }
 
-        if (touchEndX.value > touchStartX.value && (Math.max(touchStartY.value, touchEndY.value) - Math.min(touchStartY.value, touchEndY.value)) < options.value.directinoal_threshold) {
+        if (touchEndX.value > touchStartX.value && (Math.max(touchStartY.value, touchEndY.value) - Math.min(touchStartY.value, touchEndY.value)) < options.value.directional_threshold) {
             onSwipeRight.forEach(callback => callback(event));
         }
 
-        if (touchEndY.value < touchStartY.value && (Math.max(touchStartX.value, touchEndX.value) - Math.min(touchStartX.value, touchEndX.value)) < options.value.directinoal_threshold) {
+        if (touchEndY.value < touchStartY.value && (Math.max(touchStartX.value, touchEndX.value) - Math.min(touchStartX.value, touchEndX.value)) < options.value.directional_threshold) {
             onSwipeUp.forEach(callback => callback(event));
         }
 
-        if (touchEndY.value > touchStartY.value && (Math.max(touchStartX.value, touchEndX.value) - Math.min(touchStartX.value, touchEndX.value)) < options.value.directinoal_threshold) {
+        if (touchEndY.value > touchStartY.value && (Math.max(touchStartX.value, touchEndX.value) - Math.min(touchStartX.value, touchEndX.value)) < options.value.directional_threshold) {
             onSwipeDown.forEach(callback => callback(event));
         }
 
