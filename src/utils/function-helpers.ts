@@ -1,0 +1,1 @@
+export const compose = (a: (...args: unknown[]) => unknown, b: (...args: unknown[]) => unknown): (...args: unknown[]) => unknown => (x: unknown): (...args: unknown[]) => unknown => a(b(x));
