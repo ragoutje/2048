@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {onBeforeMount, ref, Ref, unref} from "vue";
 import { compose } from "./utils/function-helpers";
-import { useSwipe } from "./Touchable";
 import { DirectionMap, Matrix } from './types/matrix';
 import { directionMaps, generateMatrix, hasMovesLeft, hasWinningNumber, isValidMove, moveCells, setRandomNumber, shallowCopyMatrix } from "./utils/matrix-helpers";
 
@@ -10,7 +9,6 @@ const startValue = 2;
 const startAmount = 2;
 const followUpAmount = 1;
 const finishNumber = 2048;
-const { onSwipeLeft, onSwipeUp, onSwipeRight, onSwipeDown } = useSwipe(document.body);
 const matrix: Ref<Matrix> = ref(generateMatrix(gridSize)); // Init an empty matrix to prevent possible undefined
 
 // Refs in Vue don't handle JS object change tracking well so we have to spell the changes out like this
@@ -34,10 +32,10 @@ onBeforeMount(() => {
       handleMove(unref(matrix), map);
     }
   });
-  onSwipeLeft((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='left')));
-  onSwipeUp((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='up')));
-  onSwipeRight((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='right')));
-  onSwipeDown((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='down')));
+  // onSwipeLeft((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='left')));
+  // onSwipeUp((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='up')));
+  // onSwipeRight((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='right')));
+  // onSwipeDown((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='down')));
 });
 
 const handleMove = (oldMatrix: Matrix, directionMap: DirectionMap | undefined) => {
