@@ -4,7 +4,7 @@ import { compose } from './function-helpers';
 
 export const shallowCopyMatrix = (matrix: Matrix): Matrix => map(shallow, shallow(matrix)); // Shallow copy of the rows and row contents in the matrix
 export const mirrorMatrix = (matrix: Matrix): Matrix => map(reverse, shallow(matrix)); // Reverse the row contents in the matrix
-export const flipMatrix = (matrix: Matrix) => map((i: number) => pluck(i, matrix), rangeFrom(matrix));
+export const flipMatrix = (matrix: Matrix): Matrix => map((i: number) => pluck(i, matrix) as MatrixRow, rangeFrom(matrix));
 export const rotateMatrix = compose(flipMatrix, reverse);
 export const rotateMatrixCounterClockwise = compose(reverse, flipMatrix);
 

@@ -1,0 +1,141 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+    min-height: 100%;
+    padding: 0;
+    margin: 0;
+    background-color: var(--document-background-color);
+    // color: var(--document-font-color);
+    font-family: 'Roboto', sans-serif;
+    // font-size: 18px;
+    // line-height: 24px;
+    // font-weight: 300;
+
+
+
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    // height: 100%;
+    // min-height: 100%;
+    // padding: 0;
+    // margin: 0;
+    background-color: #eee;
+    color: #111;
+    font-size: 7.5vmin;
+    line-height: 24px;
+    font-weight: 300;
+}
+
+h1 {
+    margin: 0 auto;
+    padding-bottom: 0.5em;
+    position: relative;
+    line-height: 1.5em;
+    font-size: 1em;
+
+    button {
+        position: absolute;
+        right: 0px;
+    }
+}
+
+button {
+    display: inline-block;
+    height: 42px;
+    border: 1px solid #454545;
+    background-color: white;
+    color: #111;
+    padding: 8px 16px;
+    border-radius: 6px;
+    user-select: none;
+    font-size: 16px;
+    line-height: 24px;
+    text-align: center;
+    vertical-align: middle;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.game-container {
+    width: 100%;
+}
+
+.grid {
+    position: relative;
+    margin: 0 auto;
+    display: grid;
+    grid-gap: 0;
+    grid-template-rows: repeat(4, 20vmin);
+    grid-template-columns: repeat(4, 20vmin);
+    border-radius: 2vmin;
+    gap: 2vmin;
+    padding: 2vmin;
+    background-color: #ccc;
+
+    &-cell {
+        display: flex;
+        text-align: center;
+        vertical-align: middle;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 2vmin;
+        background-color: #fff;
+        user-select: none;
+
+        &--2 {
+            background-color: #c4ffbc;
+        }
+        &--4 {
+            background-color: #99ff87;
+        }
+        &--8 {
+            background-color: #71fd20;
+        }
+        &--16 {
+            background-color: #c4fc0d;
+        }
+        &--32 {
+            background-color: #e2ff0a;
+        }
+        &--64 {
+            background-color: #ffe100;
+        }
+        &--128 {
+            background-color: #ffb300;
+        }
+        &--256 {
+            background-color: #e98c00;
+        }
+        &--512 {
+            background-color: #e96d00;
+        }
+        &--1024 {
+            background-color: #eb4e10;
+        }
+        &--2048, &--4096, &--8192, &--16384 {
+            background-color: #e92f00;
+        }
+    }
+}
+
+@media (orientation: portrait) {
+    
+    .game-container {
+        padding: 16px;
+    }
+
+    h1 {
+        width: auto;
+    }
+
+    .grid {
+        aspect-ratio: 1 / 1;
+    }
+}

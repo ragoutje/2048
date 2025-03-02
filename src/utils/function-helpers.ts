@@ -1,1 +1,1 @@
-export const compose = (a: (...args: unknown[]) => unknown, b: (...args: unknown[]) => unknown): (...args: unknown[]) => unknown => (x: unknown): (...args: unknown[]) => unknown => a(b(x));
+export const compose = <T>(fn1: (value: T) => T, ...fns: ((value: T) => T)[]) => fns.reduce((prevFn, nextFn) => (value: T) => prevFn(nextFn(value)), fn1);

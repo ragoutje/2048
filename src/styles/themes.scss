@@ -1,0 +1,109 @@
+:root {
+    --brand-primary-color-raw: 255, 115, 0;
+    --brand-primary-color: rgb(var(--brand-primary-color-raw));
+
+    --document-background-color: rgb(238, 238, 238);
+    --document-background-color-dark: #131313;
+
+    --document-font-color: #0f0f0f;
+    --document-font-color-dark: #fff;
+
+    --heading-1-border-bottom-color: var(--brand-primary-color);
+
+    --button-background-color: #fff;
+    --button-background-color-dark: #000;
+    --button-border-color: rgb(143, 143, 143);
+    --button-border-color-dark: rgb(235, 235, 235);
+
+    --button-hover-background-color: rgb(255, 233, 216);
+    --button-hover-background-color-dark: var(--brand-primary-color);
+    --button-hover-border-color: rgb(170, 170, 170);
+    --button-hover-border-color-dark: var(--brand-primary-color);
+
+    --button-active-background-color: rgb(255, 189, 135);
+    --button-active-background-color-dark: rgba(var(--brand-primary-color-raw), 80%);
+    --button-active-border-color: #454545;
+    --button-active-border-color-dark: rgba(var(--brand-primary-color-raw), 80%);
+    --button-active-font-color: #000;
+    --button-active-font-color-dark: #fff;
+
+    --button-completed-font-color: #acacac;
+    --button-completed-font-color-dark: #acacac;
+    --button-completed-background-color: #e0e0e0;
+    --button-completed-background-color-dark: #353535;
+
+    --sudoku-cell-background-color: rgb(255, 255, 255);
+    --sudoku-cell-background-color-dark: rgb(0, 0, 0);
+    
+    --sudoku-cell-border-color: #454545;
+    --sudoku-cell-border-color-dark: rgb(187, 187, 187);
+
+    --sudoku-cell-initial-background-color: #e2e2e2;
+    --sudoku-cell-initial-background-color-dark: rgb(56, 56, 56);
+    --sudoku-cell-initial-color: inherit;
+    --sudoku-cell-initial-color-dark: var(--brand-primary-color);
+    --sudoku-cell-initial-font-weight: inherit;
+    --sudoku-cell-initial-font-weight-dark: bold;
+
+    --sudoku-cell-hover-background-color: rgb(255, 233, 216);
+    --sudoku-cell-hover-background-color-dark: rgba(var(--brand-primary-color-raw), 50%);
+
+    --sudoku-cell-highlighted-background-color: rgb(255, 189, 135);
+    --sudoku-cell-highlighted-background-color-dark: rgba(var(--brand-primary-color-raw), 80%);
+    --sudoku-cell-highlighted-color: inherit;
+    --sudoku-cell-highlighted-color-dark: rgb(255, 255, 255);
+
+    --sudoku-cell-error-background-color: rgb(255, 60, 0);
+    --sudoku-cell-error-background-color-dark: rgb(255, 60, 0);
+
+    --sudoku-cell-error-font-color: rgb(255, 255, 255);
+    --sudoku-cell-error-font-color-dark: rgb(255, 255, 255);
+
+    --sudoku-cell-notes-highlighted-background-color: rgb(255, 189, 135);
+    --sudoku-cell-notes-highlighted-background-color-dark: rgba(var(--brand-primary-color-raw), 80%);
+}
+
+@mixin dark-theme {
+    html[class="theme-auto"] {
+        @media (prefers-color-scheme: dark) {
+            @content;
+        }
+    }
+
+    html[class="theme-dark"] {
+        @content;
+    }
+}
+
+@include dark-theme {
+    --document-background-color: var(--document-background-color-dark);
+    --document-font-color: var(--document-font-color-dark);
+    
+    --button-background-color: var(--button-background-color-dark);
+    --button-border-color: var(--button-border-color-dark);
+    
+    --button-hover-background-color: var(--button-hover-background-color-dark);
+    --button-hover-border-color: var(--button-hover-border-color-dark);
+    
+    --button-active-background-color: var(--button-active-background-color-dark);
+    --button-active-border-color: var(--button-active-border-color-dark);
+    --button-active-font-color: var(--button-active-font-color-dark);
+
+    --button-completed-font-color: var(--button-completed-font-color-dark);
+    --button-completed-background-color: var(--button-completed-background-color-dark);
+    
+    --sudoku-cell-background-color: var(--sudoku-cell-background-color-dark);
+    --sudoku-cell-border-color: var(--sudoku-cell-border-color-dark);
+
+    --sudoku-cell-initial-background-color: var(--sudoku-cell-initial-background-color-dark);
+    --sudoku-cell-initial-color: var(--sudoku-cell-initial-color-dark);
+    --sudoku-cell-initial-font-weight: var(--sudoku-cell-initial-font-weight-dark);
+
+    --sudoku-cell-hover-background-color: var(--sudoku-cell-hover-background-color-dark);
+    --sudoku-cell-highlighted-background-color: var(--sudoku-cell-highlighted-background-color-dark);
+
+    --sudoku-cell-error-background-color: var(--sudoku-cell-error-background-color-dark);
+    --sudoku-cell-error-font-color: var(--sudoku-cell-error-font-color-dark);
+
+    --sudoku-cell-notes-highlighted-background-color: var(--sudoku-cell-notes-highlighted-background-color-dark);
+}

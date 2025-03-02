@@ -1,0 +1,25 @@
+#app {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.content-block {
+    margin-bottom: 16px;
+}
+
+.game-container {
+    display: block;
+}
+
+@media (orientation: portrait) {
+    .content-block {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    .game-container {
+        width: 100%;
+    }
+}
