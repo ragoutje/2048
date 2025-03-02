@@ -22,6 +22,11 @@ const startNewGame = (): void => {
   writeMatrixToRef(setRandomNumber(generateMatrix(gridSize), startValue, startAmount));
 };
 
+// Handle swipes
+const handleSwipe = (direction: string) => {
+  return handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction === direction));
+};
+
 onBeforeMount(() => {
   startNewGame();
   
@@ -32,10 +37,6 @@ onBeforeMount(() => {
       handleMove(unref(matrix), map);
     }
   });
-  // onSwipeLeft((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='left')));
-  // onSwipeUp((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='up')));
-  // onSwipeRight((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='right')));
-  // onSwipeDown((_e:TouchEvent) => handleMove(unref(matrix), directionMaps.find((map: DirectionMap) => map.direction ==='down')));
 });
 
 const handleMove = (oldMatrix: Matrix, directionMap: DirectionMap | undefined) => {
@@ -76,11 +77,11 @@ const handleMove = (oldMatrix: Matrix, directionMap: DirectionMap | undefined) =
 </script>
 
 <template>
-  <h1>
+  <!-- <h1>
     2048
     <button @click="startNewGame">New game</button>
-  </h1>
-  <div class="grid">
+  </h1> -->
+  <div v-touch:swipe="handleSwipe" class="grid">
     <template v-for="(row, iRow) in matrix">
       <div
         v-for="(cell, iCell) in row"

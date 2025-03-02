@@ -16,7 +16,7 @@ export const directionMaps: DirectionMap[] = [
       'postRotate': (m: Matrix): Matrix => m,
     },
     {
-      'direction': 'up',
+      'direction': 'top',
       'keyCodes': ['ArrowUp'],
       'preRotate': rotateMatrixCounterClockwise,
       'postRotate': rotateMatrix,
@@ -28,7 +28,7 @@ export const directionMaps: DirectionMap[] = [
       'postRotate': mirrorMatrix,
     },
     {
-      'direction': 'down',
+      'direction': 'bottom',
       'keyCodes': ['ArrowDown'],
       'preRotate': rotateMatrix,
       'postRotate': rotateMatrixCounterClockwise,
